@@ -6,6 +6,7 @@ import com.laurel.actiontracker.service.ActionItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,16 +32,19 @@ public class ActionItemController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActionItemResponse> createActionItem(@Valid @RequestBody ActionItemRequest request){
         return ResponseEntity.status(HttpStatus.CREATED).body(actionItemService.createActionItem(request));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActionItemResponse> updateActionItem(@PathVariable Long id, @Valid @RequestBody ActionItemRequest request){
         return ResponseEntity.ok(actionItemService.updateActionItem(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteActionItem(@PathVariable Long id){
         actionItemService.deleteActionItem(id);
         return ResponseEntity.noContent().build();

@@ -6,6 +6,7 @@ import com.laurel.actiontracker.service.MeetingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,16 +32,19 @@ public class MeetingController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MeetingResponse> createMeeting(@Valid @RequestBody MeetingRequest request){
         return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.createMeeting(request));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MeetingResponse> updateMeeting(@PathVariable Long id, @Valid @RequestBody MeetingRequest request){
         return ResponseEntity.ok(meetingService.updateMeeting(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMeeting(@PathVariable Long id){
         meetingService.deleteMeeting(id);
         return ResponseEntity.noContent().build();
