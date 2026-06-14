@@ -1,0 +1,11 @@
+spring:
+    application:
+        name: action-item-tracker
+    datasource:
+        url: jdbc:postgresql://localhost:5432/actiontracker
+        username: actiontracker
+        password: actiontracker_dev
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
