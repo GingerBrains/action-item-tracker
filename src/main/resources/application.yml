@@ -9,3 +9,13 @@ spring:
         hibernate:
             ddl-auto: update
         show-sql: true
+        open-in-view: false
+
+app:
+    jwt:
+        secret: your-very-long-secret-key-that-is-at-least-256-bits-long-for-security
+        expiration-ms: 86400000
+
+logging:
+    level:
+        org.springframework.security: DEBUG

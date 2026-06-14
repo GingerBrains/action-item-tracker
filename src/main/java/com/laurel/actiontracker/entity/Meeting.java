@@ -1,5 +1,6 @@
 package com.laurel.actiontracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ public class Meeting {
     @Column(nullable = false)
     private Status status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ActionItem> actionItems = new ArrayList<>();
 
