@@ -40,7 +40,6 @@ build/
 *.jar
 *.war
 *.ear
-*.log
 *.orig
 *.temp
 *.swp
