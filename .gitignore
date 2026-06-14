@@ -31,3 +31,34 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### SECRETS ###
+.env
+
+# Java specific
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.orig
+*.temp
+*.swp
+*.~
+
+# Spring Boot specific
+spring-shell.log
+application-prod.yml
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Package files (if any)
+*.zip
+*.tar.gz
