@@ -1,14 +1,15 @@
 package com.laurel.actiontracker.service;
 
-import com.laurel.actiontracker.entity.Meeting;
+import com.laurel.actiontracker.dto.request.MeetingRequest;
+import com.laurel.actiontracker.dto.response.MeetingResponse;
 
 import java.util.List;
 
 public interface MeetingService {
 
-    List<Meeting> getAllMeetings();
-    Meeting getMeetingById(Long id);
-    Meeting createMeeting(Meeting meeting);
-    Meeting updateMeeting(Long id, Meeting meeting);
+    List<MeetingResponse> getAllMeetings();
+    MeetingResponse getMeetingById(Long id);
+    MeetingResponse createMeeting(MeetingRequest request);
+    MeetingResponse updateMeeting(Long id, MeetingRequest request);
     void deleteMeeting(Long id);
 }

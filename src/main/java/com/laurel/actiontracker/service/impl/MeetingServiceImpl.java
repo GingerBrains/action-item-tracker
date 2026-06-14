@@ -1,5 +1,7 @@
 package com.laurel.actiontracker.service.impl;
 
+import com.laurel.actiontracker.dto.request.MeetingRequest;
+import com.laurel.actiontracker.dto.response.MeetingResponse;
 import com.laurel.actiontracker.entity.Meeting;
 import com.laurel.actiontracker.exception.ResourceNotFoundException;
 import com.laurel.actiontracker.repository.MeetingRepository;
@@ -19,34 +21,42 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public List<Meeting> getAllMeetings() {
-        return meetingRepository.findAll();
+    public List<MeetingResponse> getAllMeetings() {
+        return meetingRepository.findAll().stream()
+                .map(MeetingResponse::from)
+                .toList();
     }
 
     @Override
-    public Meeting getMeetingById(Long id) {
-        return meetingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found with id: " + id));
+    public MeetingResponse getMeetingById(Long id) {
+        Meeting meeting = findMeetingOrThrow(id);
+        return MeetingResponse.from(meeting);
     }
 
     @Override
-    public Meeting createMeeting(Meeting meeting) {
-        return meetingRepository.save(meeting);
+    public MeetingResponse createMeeting(MeetingRequest request) {
+        return MeetingResponse.from(meetingRepository.save(request.toEntity()));
     }
 
     @Override
-    public Meeting updateMeeting(Long id, Meeting meeting) {
-        Meeting existing = getMeetingById(id);
-        existing.setTitle(meeting.getTitle());
-        existing.setDescription(meeting.getDescription());
-        existing.setMeetingDate(meeting.getMeetingDate());
-        existing.setStatus(meeting.getStatus());
-        return meetingRepository.save(existing);
+    public MeetingResponse updateMeeting(Long id, MeetingRequest request) {
+        Meeting existing = findMeetingOrThrow(id);
+        Meeting updated = request.toEntity();
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setMeetingDate(updated.getMeetingDate());
+        existing.setStatus(updated.getStatus());
+        return MeetingResponse.from(meetingRepository.save(existing));
     }
 
     @Override
     public void deleteMeeting(Long id) {
-        Meeting existing = getMeetingById(id);
+        Meeting existing = findMeetingOrThrow(id);
         meetingRepository.delete(existing);
+    }
+
+    private Meeting findMeetingOrThrow(Long id) {
+        return meetingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found with id: " + id));
     }
 }

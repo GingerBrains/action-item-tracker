@@ -28,6 +28,10 @@ public class ActionItem {
     @Column(nullable = false)
     private Status status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority;
+
     @Column(nullable = false)
     private LocalDate dueDate;
 

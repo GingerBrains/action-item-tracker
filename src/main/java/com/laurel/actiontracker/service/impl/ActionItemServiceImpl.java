@@ -1,8 +1,14 @@
 package com.laurel.actiontracker.service.impl;
 
+import com.laurel.actiontracker.dto.request.ActionItemRequest;
+import com.laurel.actiontracker.dto.response.ActionItemResponse;
 import com.laurel.actiontracker.entity.ActionItem;
+import com.laurel.actiontracker.entity.Meeting;
+import com.laurel.actiontracker.entity.User;
 import com.laurel.actiontracker.exception.ResourceNotFoundException;
 import com.laurel.actiontracker.repository.ActionItemRepository;
+import com.laurel.actiontracker.repository.MeetingRepository;
+import com.laurel.actiontracker.repository.UserRepository;
 import com.laurel.actiontracker.service.ActionItemService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,43 +20,75 @@ import java.util.List;
 public class ActionItemServiceImpl implements ActionItemService {
 
     private final ActionItemRepository actionItemRepository;
+    private final MeetingRepository meetingRepository;
+    private final UserRepository userRepository;
 
-    public ActionItemServiceImpl(ActionItemRepository actionItemRepository) {
+    public ActionItemServiceImpl(ActionItemRepository actionItemRepository, MeetingRepository meetingRepository, UserRepository userRepository) {
         this.actionItemRepository = actionItemRepository;
+        this.meetingRepository = meetingRepository;
+        this.userRepository = userRepository;
     }
 
 
     @Override
-    public List<ActionItem> getAllActionItems() {
-        return actionItemRepository.findAll();
+    public List<ActionItemResponse> getAllActionItems() {
+        return actionItemRepository.findAll().stream().map(ActionItemResponse::from).toList();
     }
 
     @Override
-    public ActionItem getActionItemById(Long id) {
-        return actionItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Action Item not found with id " + id)) ;
+    public ActionItemResponse getActionItemById(Long id) {
+        ActionItem actionItem = findActionItemOrThrow(id);
+        return ActionItemResponse.from(actionItem);
     }
 
     @Override
-    public ActionItem createActionItem(ActionItem actionItem) {
-        return actionItemRepository.save(actionItem);
+    public ActionItemResponse createActionItem(ActionItemRequest request) {
+        ActionItem actionItem = request.toEntity();
+
+        Meeting meeting = meetingRepository.findById(request.getMeetingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found with id : " + request.getMeetingId()));
+        actionItem.setMeeting(meeting);
+
+        if(request.getAssigneeId() != null){
+            User assignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Assignee not found with id : " + request.getAssigneeId()));
+            actionItem.setAssignee(assignee);
+        }
+        return ActionItemResponse.from(actionItemRepository.save(actionItem));
+
     }
 
+
     @Override
-    public ActionItem updateActionItem(Long id, ActionItem actionItem) {
-        ActionItem existing = getActionItemById(id);
-        existing.setTitle(actionItem.getTitle());
-        existing.setDescription(actionItem.getDescription());
-        existing.setStatus(actionItem.getStatus());
-        existing.setDueDate(actionItem.getDueDate());
-        existing.setMeeting(actionItem.getMeeting());
-        existing.setAssignee(actionItem.getAssignee());
-        return actionItemRepository.save(existing);
+    public ActionItemResponse updateActionItem(Long id, ActionItemRequest request) {
+        ActionItem existing = findActionItemOrThrow(id);
+        ActionItem updated = request.toEntity();
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setStatus(updated.getStatus());
+        existing.setDueDate(updated.getDueDate());
+
+        Meeting meeting = meetingRepository.findById(request.getMeetingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting not found with id : " + request.getMeetingId()));
+        existing.setMeeting(meeting);
+
+        if(request.getAssigneeId() != null){
+            User assignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Assignee not found with id : " + request.getAssigneeId()));
+            existing.setAssignee(assignee);
+        }
+
+        return ActionItemResponse.from(actionItemRepository.save(existing));
     }
 
     @Override
     public void deleteActionItem(Long id) {
-        ActionItem existing = getActionItemById(id);
+        ActionItem existing = findActionItemOrThrow(id);
         actionItemRepository.delete(existing);
+    }
+
+    private ActionItem findActionItemOrThrow(Long id) {
+        return actionItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Action Item not found with id: " + id));
     }
 }

@@ -1,7 +1,9 @@
 package com.laurel.actiontracker.controller;
 
-import com.laurel.actiontracker.entity.Meeting;
+import com.laurel.actiontracker.dto.request.MeetingRequest;
+import com.laurel.actiontracker.dto.response.MeetingResponse;
 import com.laurel.actiontracker.service.MeetingService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,23 +21,23 @@ public class MeetingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Meeting>> getAllMeetings() {
+    public ResponseEntity<List<MeetingResponse>> getAllMeetings() {
         return ResponseEntity.ok(meetingService.getAllMeetings());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Meeting> getMeetingById(@PathVariable Long id){
+    public ResponseEntity<MeetingResponse> getMeetingById(@PathVariable Long id){
         return ResponseEntity.ok((meetingService.getMeetingById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<Meeting> createMeeting(@RequestBody Meeting meeting){
-        return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.createMeeting(meeting));
+    public ResponseEntity<MeetingResponse> createMeeting(@Valid @RequestBody MeetingRequest request){
+        return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.createMeeting(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Meeting> updateMeeting(@PathVariable Long id, @RequestBody Meeting meeting){
-        return ResponseEntity.ok(meetingService.updateMeeting(id, meeting));
+    public ResponseEntity<MeetingResponse> updateMeeting(@PathVariable Long id, @Valid @RequestBody MeetingRequest request){
+        return ResponseEntity.ok(meetingService.updateMeeting(id, request));
     }
 
     @DeleteMapping("/{id}")
