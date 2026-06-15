@@ -61,3 +61,9 @@ desktop.ini
 # Package files (if any)
 *.zip
 *.tar.gz
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
