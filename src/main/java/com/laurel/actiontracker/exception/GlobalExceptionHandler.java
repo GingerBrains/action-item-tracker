@@ -2,6 +2,7 @@ package com.laurel.actiontracker.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +27,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
                 "error", "Forbidden",
                 "message", "You do not have permission to perform this action",
+                "timestamp", Instant.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", "Unauthorized",
+                "message", "Invalid email or password",
                 "timestamp", Instant.now().toString()
         ));
     }
