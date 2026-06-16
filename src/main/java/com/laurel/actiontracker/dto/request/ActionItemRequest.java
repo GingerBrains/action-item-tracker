@@ -3,10 +3,12 @@ package com.laurel.actiontracker.dto.request;
 import com.laurel.actiontracker.entity.ActionItem;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
+@Builder
 @Getter
 public class ActionItemRequest {
     @NotBlank(message = "Title is required")
