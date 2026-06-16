@@ -30,9 +30,6 @@ public class ActionItemServiceTest {
     private ActionItemRepository actionItemRepository;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private MeetingRepository meetingRepository;
 
     @InjectMocks
