@@ -3,6 +3,7 @@ package com.laurel.actiontracker.controller;
 import com.laurel.actiontracker.dto.LoginRequest;
 import com.laurel.actiontracker.dto.RegisterRequest;
 import com.laurel.actiontracker.entity.User;
+import com.laurel.actiontracker.exception.EmailAlreadyExistsException;
 import com.laurel.actiontracker.repository.UserRepository;
 import com.laurel.actiontracker.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request){
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
+        }
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
