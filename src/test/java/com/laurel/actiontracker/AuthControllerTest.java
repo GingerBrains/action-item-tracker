@@ -58,7 +58,7 @@ public class AuthControllerTest {
     @Test
     void register_return200() throws Exception {
         RegisterRequest request = RegisterRequest.builder()
-                .email("fakemail.company.com")
+                .email("fakemail@company.com")
                 .fullName("Fake Name")
                 .password("someStrongPassword")
                 .build();
@@ -92,18 +92,18 @@ public class AuthControllerTest {
     @Test
     void login_returns200WithToken() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("fakemail.company.com")
+                .email("fakemail@company.com")
                 .password("someStrongPassword")
                 .build();
 
         UserDetails userDetails = User.builder()
-                .username("fakemail.company.com")
+                .username("fakemail@company.com")
                 .password("hashedPassword")
                 .roles("MEMBER")
                 .build();
 
         when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken("fakemail.company.com", "someStrongPassword"));
-        when(customUserDetailsService.loadUserByUsername("fakemail.company.com")).thenReturn(userDetails);
+        when(customUserDetailsService.loadUserByUsername("fakemail@company.com")).thenReturn(userDetails);
         when(jwtUtil.generateToken(userDetails)).thenReturn("someToken");
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -117,7 +117,7 @@ public class AuthControllerTest {
     @Test
     void login_returns401ForBadCredentials() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("fakemail.company.com")
+                .email("fakemail@company.com")
                 .password("wrongPassword")
                 .build();
 
@@ -128,6 +128,33 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void register_returns400WhenEmailIsBlank() throws Exception {
+        RegisterRequest request = RegisterRequest.builder()
+                .email("")
+                .fullName("Some Name")
+                .password("somePassword123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void login_returns400WhenEmailIsBlank() throws Exception {
+        LoginRequest request = LoginRequest.builder()
+                .email("")
+                .password("somePassword123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
 }
