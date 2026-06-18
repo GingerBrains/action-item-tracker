@@ -6,6 +6,7 @@ import com.laurel.actiontracker.entity.User;
 import com.laurel.actiontracker.exception.EmailAlreadyExistsException;
 import com.laurel.actiontracker.repository.UserRepository;
 import com.laurel.actiontracker.security.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request){
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest request){
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
@@ -51,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request){
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
