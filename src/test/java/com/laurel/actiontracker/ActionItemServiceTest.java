@@ -125,4 +125,100 @@ public class ActionItemServiceTest {
         verify(actionItemRepository, times(1)).save(any(ActionItem.class));
         verify(meetingRepository, times(1)).findById(9L);
     }
+
+    @Test
+    void updateActionItem_savesAndReturnsResponse() {
+        ActionItem actionItem = new ActionItem();
+        actionItem.setId(1L);
+        actionItem.setTitle("Original Title");
+        actionItem.setStatus(ActionItem.Status.OPEN);
+        actionItem.setPriority(ActionItem.Priority.HIGH);
+        actionItem.setDueDate(LocalDate.of(2026, 7, 10));
+
+        ActionItem updatedActionItem = new ActionItem();
+        updatedActionItem.setId(1L);
+        updatedActionItem.setTitle("Updated Title");
+        updatedActionItem.setStatus(ActionItem.Status.COMPLETED);
+        updatedActionItem.setPriority(ActionItem.Priority.HIGH);
+        updatedActionItem.setDueDate(LocalDate.of(2026, 7, 10));
+
+        Meeting meeting = new Meeting();
+        meeting.setId(9L);
+        meeting.setTitle("Q3 Board Meeting");
+        meeting.setStatus(Meeting.Status.SCHEDULED);
+        actionItem.setMeeting(meeting);
+        updatedActionItem.setMeeting(meeting);
+
+        ActionItemRequest request = ActionItemRequest.builder()
+                .title("Updated Title")
+                .dueDate(LocalDate.of(2026, 7, 10))
+                .status(ActionItem.Status.COMPLETED)
+                .priority(ActionItem.Priority.HIGH)
+                .meetingId(9L)
+                .build();
+
+        when(actionItemRepository.findById(1L)).thenReturn(Optional.of(actionItem));
+        when(actionItemRepository.save(any(ActionItem.class))).thenReturn(updatedActionItem);
+        when(meetingRepository.findById(9L)).thenReturn(Optional.of(meeting));
+
+        ActionItemResponse result = actionItemService.updateActionItem(1L, request);
+
+        assertThat(result.getTitle()).isEqualTo("Updated Title");
+        verify(actionItemRepository, times(1)).save(any(ActionItem.class));
+        verify(meetingRepository, times(1)).findById(9L);
+    }
+
+    @Test
+    void updateActionItem_throwsWhenNotFound() {
+        ActionItemRequest request = ActionItemRequest.builder()
+                .title("Updated Title")
+                .dueDate(LocalDate.of(2026, 7, 10))
+                .status(ActionItem.Status.COMPLETED)
+                .priority(ActionItem.Priority.HIGH)
+                .meetingId(9L)
+                .build();
+
+        when(actionItemRepository.findById(9L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> actionItemService.updateActionItem(9L, request))
+                .isInstanceOf(ResourceNotFoundException.class).
+                hasMessageContaining("9");
+
+    }
+
+    @Test
+    void deleteActionItem_deletesWhenfound() {
+        ActionItem actionItem = new ActionItem();
+        actionItem.setId(1L);
+        actionItem.setTitle("Original Title");
+        actionItem.setStatus(ActionItem.Status.OPEN);
+        actionItem.setPriority(ActionItem.Priority.HIGH);
+        actionItem.setDueDate(LocalDate.of(2026, 7, 10));
+
+
+        Meeting meeting = new Meeting();
+        meeting.setId(9L);
+        meeting.setTitle("Q3 Board Meeting");
+        meeting.setStatus(Meeting.Status.SCHEDULED);
+        actionItem.setMeeting(meeting);
+
+        when(actionItemRepository.findById(1L)).thenReturn(Optional.of(actionItem));
+        doNothing().when(actionItemRepository).delete(any(ActionItem.class));
+
+        actionItemService.deleteActionItem(1L);
+
+
+        verify(actionItemRepository, times(1)).delete(any(ActionItem.class));
+        verify(actionItemRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void deleteActionItem_throwsWhenNotFound() {
+        when(actionItemRepository.findById(9L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> actionItemService.deleteActionItem(9L))
+                .isInstanceOf(ResourceNotFoundException.class).
+                hasMessageContaining("9");
+    }
+
 }
