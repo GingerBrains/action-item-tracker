@@ -9,6 +9,8 @@ import com.laurel.actiontracker.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -28,8 +30,19 @@ public class UserServiceImpl implements UserService {
         return UserResponse.from(userRepository.save(user));
     }
 
+    @Override
+    public UserResponse getUserByEmail(String email) {
+        User user = findUserOrThrow(email);
+        return UserResponse.from(user);
+    }
+
     private User findUserOrThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    }
+
+    private User findUserOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 }
