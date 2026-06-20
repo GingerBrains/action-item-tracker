@@ -6,12 +6,19 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.laurel.actiontracker.controller.AuthController;
 import com.laurel.actiontracker.dto.LoginRequest;
 import com.laurel.actiontracker.dto.RegisterRequest;
+import com.laurel.actiontracker.dto.response.UserResponse;
+import com.laurel.actiontracker.exception.ResourceNotFoundException;
 import com.laurel.actiontracker.repository.UserRepository;
 import com.laurel.actiontracker.security.CustomUserDetailsService;
 import com.laurel.actiontracker.security.JwtUtil;
+import com.laurel.actiontracker.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.MockMvcBuilderCustomizer;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,19 +26,32 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static com.laurel.actiontracker.entity.User.Role.ADMIN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
+@Import(com.laurel.actiontracker.security.SecurityConfig.class)
 public class AuthControllerTest {
+
+    @TestConfiguration
+    static class MockMvcSecurityConfig {
+        @Bean
+        MockMvcBuilderCustomizer securityConfigurer() {
+            return builder -> builder.apply(SecurityMockMvcConfigurers.springSecurity());
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,6 +67,9 @@ public class AuthControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private UserService userService;
 
     @MockitoBean
     private PasswordEncoder passwordEncoder;
@@ -155,6 +178,33 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser@mail.com")
+    void getCurrentUser_returns200WithUserDetails() throws Exception {
+        com.laurel.actiontracker.entity.User user = new com.laurel.actiontracker.entity.User();
+        user.setId(1L);
+        user.setFullName("Full Name");
+        user.setEmail("testuser@mail.com");
+        user.setRole(ADMIN);
+
+        when(userService.getUserByEmail("testuser@mail.com")).thenReturn(UserResponse.from(user));
+
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("testuser@mail.com"))
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+    }
+
+    @Test
+    @WithMockUser(username = "missing@mail.com")
+    void getCurrentUser_returns404WhenUserNotFound() throws Exception {
+        when(userService.getUserByEmail("missing@mail.com"))
+                .thenThrow(new ResourceNotFoundException("User not found with email: missing@mail.com"));
+
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isNotFound());
     }
 
 }
