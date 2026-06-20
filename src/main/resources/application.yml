@@ -13,8 +13,12 @@ spring:
 
 app:
     jwt:
-        secret: your-very-long-secret-key-that-is-at-least-256-bits-long-for-security
-        expiration-ms: 86400000
+        secret: ${JWT_SECRET_KEY:your-very-long-secret-key-that-is-at-least-256-bits-long-for-security}
+        expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    admin:
+        email: ${ADMIN_EMAIL:admin@actiontracker.com}
+        password: ${ADMIN_PASSWORD:changeme123}
+        fullName: ${ADMIN_FULL_NAME:System Administrator}
 
 logging:
     level:
