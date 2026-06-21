@@ -1,8 +1,5 @@
 package com.laurel.actiontracker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.laurel.actiontracker.controller.ActionItemController;
 import com.laurel.actiontracker.dto.request.ActionItemRequest;
 import com.laurel.actiontracker.dto.response.ActionItemResponse;
@@ -14,11 +11,9 @@ import com.laurel.actiontracker.security.JwtUtil;
 import com.laurel.actiontracker.service.ActionItemService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,22 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ActionItemController.class)
 @Import(ActionItemControllerTest.MethodSecurityTestConfig .class)
-public class ActionItemControllerTest {
-
-    @TestConfiguration
-    @EnableMethodSecurity
-    static class MethodSecurityTestConfig {
-    }
+public class ActionItemControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private ActionItemService actionItemService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @MockitoBean
     private JwtUtil jwtUtil;
