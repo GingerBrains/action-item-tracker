@@ -15,12 +15,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDate;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,17 +25,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @WebMvcTest(MeetingController.class)
 @Import(MeetingControllerTest.MethodSecurityTestConfig.class)
-public class MeetingControllerTest {
-
-    @TestConfiguration
-    @EnableMethodSecurity
-    static class MethodSecurityTestConfig {
-    }
+public class MeetingControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,10 +36,6 @@ public class MeetingControllerTest {
     @MockitoBean
     private MeetingService meetingService;
 
-
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @MockitoBean
     private JwtUtil jwtUtil;
