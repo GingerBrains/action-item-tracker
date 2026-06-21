@@ -9,7 +9,7 @@ import com.laurel.actiontracker.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @Transactional
@@ -21,6 +21,18 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserResponse::from)
+                .toList();
+    }
+
+    @Override
+    public UserResponse getUserById(Long id) {
+        return UserResponse.from(findUserOrThrow(id));
+    }
 
     @Override
     public UserResponse updateUserRole(Long userId, UpdateUserRoleRequest request) {
