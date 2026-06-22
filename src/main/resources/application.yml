@@ -14,7 +14,8 @@ spring:
 app:
     jwt:
         secret: ${JWT_SECRET_KEY:your-very-long-secret-key-that-is-at-least-256-bits-long-for-security}
-        expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+        expiration-ms: ${JWT_EXPIRATION_MS:900000}
+        refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
     admin:
         email: ${ADMIN_EMAIL:admin@actiontracker.com}
         password: ${ADMIN_PASSWORD:changeme123}
