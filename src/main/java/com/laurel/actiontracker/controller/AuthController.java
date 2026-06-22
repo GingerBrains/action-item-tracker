@@ -1,21 +1,15 @@
 package com.laurel.actiontracker.controller;
 
-import com.laurel.actiontracker.dto.LoginRequest;
-import com.laurel.actiontracker.dto.RegisterRequest;
+import com.laurel.actiontracker.dto.request.LoginRequest;
+import com.laurel.actiontracker.dto.request.RefreshTokenRequest;
+import com.laurel.actiontracker.dto.request.RegisterRequest;
+import com.laurel.actiontracker.dto.response.AuthResponse;
 import com.laurel.actiontracker.dto.response.UserResponse;
-import com.laurel.actiontracker.entity.User;
-import com.laurel.actiontracker.exception.EmailAlreadyExistsException;
-import com.laurel.actiontracker.repository.UserRepository;
-import com.laurel.actiontracker.security.JwtUtil;
+import com.laurel.actiontracker.service.AuthService;
 import com.laurel.actiontracker.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,51 +18,34 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final AuthService authService;
 
-
-    public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, JwtUtil jwtUtil, UserRepository userRepository, PasswordEncoder passwordEncoder, UserService userService) {
-        this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(UserService userService, AuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest request){
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
+        return ResponseEntity.ok(authService.login(request));
+    }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        String token = jwtUtil.generateToken(userDetails);
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request){
+        return ResponseEntity.ok(authService.refresh(request));
+    }
 
-        return ResponseEntity.ok(Map.of("token", token));
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@Valid @RequestBody RefreshTokenRequest request){
+        authService.logout(request);
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request){
-
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new EmailAlreadyExistsException("Email already registered: " + request.getEmail());
-        }
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setFullName(request.getFullName());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole(User.Role.MEMBER);
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok(Map.of("message", "User registered sucessfully"));
+        authService.register(request);
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
     @GetMapping("/me")

@@ -11,19 +11,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class AdminSeederConfig {
 
-    @Value("${app.admin.email}")
-    private String seedEmail;
-
-    @Value("${app.admin.fullName}")
-    private String fullName;
-
-    @Value("${app.admin.password}")
-    private String seedPassword;
-
+    private final String seedEmail;
+    private final String fullName;
+    private final String seedPassword;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AdminSeederConfig(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AdminSeederConfig(@Value("${app.admin.email}") String seedEmail,
+                             @Value("${app.admin.fullName}") String fullName,
+                             @Value("${app.admin.password}") String seedPassword,
+                             UserRepository userRepository,
+                             PasswordEncoder passwordEncoder) {
+        this.seedEmail = seedEmail;
+        this.fullName = fullName;
+        this.seedPassword = seedPassword;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
