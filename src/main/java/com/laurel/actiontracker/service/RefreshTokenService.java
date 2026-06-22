@@ -8,5 +8,6 @@ public interface RefreshTokenService {
     RefreshTokenResult createRefreshToken(User user);
     RefreshToken validateAndGetByRawToken(String rawToken);
     void deleteToken(RefreshToken token);
+    void deleteByRawToken(String rawToken);
     void deleteExpiredAndRevokedTokens();
 }

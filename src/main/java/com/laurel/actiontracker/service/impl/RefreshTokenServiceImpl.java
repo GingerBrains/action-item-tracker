@@ -54,6 +54,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
+    public void deleteByRawToken(String rawToken) {
+        refreshTokenRepository.deleteByTokenHash(TokenHashUtil.hash(rawToken));
+    }
+
+    @Override
     public void deleteExpiredAndRevokedTokens() {
         refreshTokenRepository.deleteByRevokedTrueOrExpiryDateBefore(Instant.now());
     }

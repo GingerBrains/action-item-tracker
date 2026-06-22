@@ -1,4 +1,4 @@
-package com.laurel.actiontracker.dto;
+package com.laurel.actiontracker.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
