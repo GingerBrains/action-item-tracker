@@ -7,21 +7,28 @@ export default function Login() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setFieldErrors({ ...fieldErrors, [e.target.name]: undefined })
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
+    setFieldErrors({})
     setLoading(true)
     try {
       await login(form.email, form.password)
       navigate('/')
     } catch (err) {
-      setError(err.message || 'Invalid credentials. Please try again.')
+      if (err.fields) {
+        setFieldErrors(err.fields)
+      } else {
+        setError(err.message || 'Invalid credentials. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -45,11 +52,12 @@ export default function Login() {
               type="email"
               required
               autoFocus
-              className="form-input"
+              className={`form-input${fieldErrors.email ? ' input-error' : ''}`}
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
             />
+            {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
@@ -58,11 +66,12 @@ export default function Login() {
               name="password"
               type="password"
               required
-              className="form-input"
+              className={`form-input${fieldErrors.password ? ' input-error' : ''}`}
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"
             />
+            {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
           </div>
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}

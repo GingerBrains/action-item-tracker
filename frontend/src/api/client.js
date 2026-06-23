@@ -1,28 +1,36 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-export function createApiClient(token, onUnauthorized, onForbidden) {
-  async function request(method, path, body) {
+export function createApiClient(token, onUnauthorized, onRefresh) {
+  function doFetch(tkn, method, path, body) {
     const options = {
       method,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(tkn ? { Authorization: `Bearer ${tkn}` } : {}),
       },
     }
-    if (body !== undefined) {
-      options.body = JSON.stringify(body)
-    }
+    if (body !== undefined) options.body = JSON.stringify(body)
+    return fetch(`${BASE_URL}${path}`, options)
+  }
 
-    const res = await fetch(`${BASE_URL}${path}`, options)
+  async function request(method, path, body) {
+    let res = await doFetch(token, method, path, body)
 
     if (res.status === 401) {
-      onUnauthorized?.()
-      const err = new Error('Session expired. Please log in again.')
-      err.status = 401
-      throw err
+      const newToken = onRefresh ? await onRefresh() : null
+      if (newToken) {
+        res = await doFetch(newToken, method, path, body)
+      }
+      if (res.status === 401) {
+        onUnauthorized?.()
+        const err = new Error('Session expired. Please log in again.')
+        err.status = 401
+        throw err
+      }
     }
+
     if (res.status === 403) {
-      onForbidden?.()
       const err = new Error('You do not have permission to perform this action.')
       err.status = 403
       throw err
