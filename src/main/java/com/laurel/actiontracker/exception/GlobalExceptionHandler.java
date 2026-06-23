@@ -2,6 +2,7 @@ package com.laurel.actiontracker.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
@@ -63,6 +64,15 @@ public class GlobalExceptionHandler {
                 "error", "Bad Request",
                 "message", "Validation failed",
                 "fields", fieldErrors
+        ));
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", "Unauthorized",
+                "message", "Refresh token is no longer valid",
+                "timestamp", Instant.now().toString()
         ));
     }
 

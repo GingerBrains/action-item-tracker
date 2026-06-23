@@ -10,6 +10,7 @@ import MeetingDetail from './pages/MeetingDetail'
 import MeetingForm from './pages/MeetingForm'
 import ActionItemsList from './pages/ActionItemsList'
 import ActionItemForm from './pages/ActionItemForm'
+import UsersList from './pages/UsersList'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="/action-items" element={<ActionItemsList />} />
               <Route path="/action-items/new" element={<ActionItemForm />} />
               <Route path="/action-items/:id/edit" element={<ActionItemForm />} />
+              <Route path="/users" element={<UsersList />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

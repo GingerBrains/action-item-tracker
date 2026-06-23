@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { createApiClient } from './client'
 
 export function useApi() {
-  const { token, logout, markNotAdmin } = useAuth()
+  const { token, logout, refresh } = useAuth()
   const navigate = useNavigate()
 
   const onUnauthorized = useCallback(() => {
@@ -12,5 +12,5 @@ export function useApi() {
     navigate('/login')
   }, [logout, navigate])
 
-  return createApiClient(token, onUnauthorized, markNotAdmin)
+  return createApiClient(token, onUnauthorized, refresh)
 }

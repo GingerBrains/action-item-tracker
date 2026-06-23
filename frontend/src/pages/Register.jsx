@@ -28,8 +28,10 @@ export default function Register() {
       })
       const data = await res.json()
       if (!res.ok) {
-        if (res.status === 400 && data.errors) {
-          setErrors(data.errors)
+        if (res.status === 400 && data.fields) {
+          setErrors(data.fields)
+        } else if (res.status === 409) {
+          setGlobalError(data.message || 'An account with this email already exists.')
         } else {
           setGlobalError(data.message || 'Registration failed.')
         }
