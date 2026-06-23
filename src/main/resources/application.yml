@@ -21,6 +21,9 @@ app:
         password: ${ADMIN_PASSWORD:changeme123}
         fullName: ${ADMIN_FULL_NAME:System Administrator}
 
+    cors:
+        allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+
 logging:
     level:
         org.springframework.security: DEBUG

@@ -7,6 +7,8 @@ import com.laurel.actiontracker.dto.response.AuthResponse;
 import com.laurel.actiontracker.dto.response.UserResponse;
 import com.laurel.actiontracker.service.AuthService;
 import com.laurel.actiontracker.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,18 +29,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request,
+                                              HttpServletResponse response) {
+        return ResponseEntity.ok(authService.login(request, response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request){
-        return ResponseEntity.ok(authService.refresh(request));
+    public ResponseEntity<AuthResponse> refresh(HttpServletRequest request,
+                                                HttpServletResponse response) {
+        return ResponseEntity.ok(authService.refresh(request, response));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout(@Valid @RequestBody RefreshTokenRequest request){
-        authService.logout(request);
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request,
+                                                      HttpServletResponse response) {
+        authService.logout(request, response);
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 

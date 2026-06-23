@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.laurel.actiontracker.controller.AuthController;
 import com.laurel.actiontracker.dto.request.LoginRequest;
-import com.laurel.actiontracker.dto.request.RefreshTokenRequest;
 import com.laurel.actiontracker.dto.request.RegisterRequest;
 import com.laurel.actiontracker.dto.response.AuthResponse;
 import com.laurel.actiontracker.dto.response.UserResponse;
@@ -119,20 +118,47 @@ public class AuthControllerTest {
     }
 
     @Test
+    void register_returns400WhenPasswordIsBlank() throws Exception {
+        RegisterRequest request = RegisterRequest.builder()
+                .email("fakemail@company.com")
+                .fullName("Some Name")
+                .password("")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void register_returns400WhenFullNameIsBlank() throws Exception {
+        RegisterRequest request = RegisterRequest.builder()
+                .email("fakemail@company.com")
+                .fullName("")
+                .password("somePassword123")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void login_returns200WithTokens() throws Exception {
         LoginRequest request = LoginRequest.builder()
                 .email("fakemail@company.com")
                 .password("someStrongPassword")
                 .build();
 
-        when(authService.login(any())).thenReturn(new AuthResponse("someAccessToken", "someRefreshToken"));
+        when(authService.login(any(), any())).thenReturn(new AuthResponse("someAccessToken"));
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("someAccessToken"))
-                .andExpect(jsonPath("$.refreshToken").value("someRefreshToken"));
+                .andExpect(jsonPath("$.accessToken").value("someAccessToken"));
     }
 
     @Test
@@ -142,7 +168,7 @@ public class AuthControllerTest {
                 .password("wrongPassword")
                 .build();
 
-        when(authService.login(any()))
+        when(authService.login(any(), any()))
                 .thenThrow(new BadCredentialsException("Invalid email or password"));
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -165,103 +191,61 @@ public class AuthControllerTest {
     }
 
     @Test
-    void refresh_returns200WithNewTokens() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("validRefreshToken")
+    void login_returns400WhenPasswordIsBlank() throws Exception {
+        LoginRequest request = LoginRequest.builder()
+                .email("fakemail@company.com")
+                .password("")
                 .build();
 
-        when(authService.refresh(any())).thenReturn(new AuthResponse("newAccessToken", "newRefreshToken"));
-
-        mockMvc.perform(post("/api/v1/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("newAccessToken"))
-                .andExpect(jsonPath("$.refreshToken").value("newRefreshToken"));
-    }
-
-    @Test
-    void refresh_returns401WhenTokenExpired() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("expiredRefreshToken")
-                .build();
-
-        when(authService.refresh(any()))
-                .thenThrow(new TokenExpiredException("Refresh token has expired"));
-
-        mockMvc.perform(post("/api/v1/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void refresh_returns404WhenTokenNotFound() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("unknownRefreshToken")
-                .build();
-
-        when(authService.refresh(any()))
-                .thenThrow(new ResourceNotFoundException("Token not found"));
-
-        mockMvc.perform(post("/api/v1/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void refresh_returns400WhenRefreshTokenIsBlank() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("")
-                .build();
-
-        mockMvc.perform(post("/api/v1/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    void refresh_returns200WithNewAccessToken() throws Exception {
+        when(authService.refresh(any(), any())).thenReturn(new AuthResponse("newAccessToken"));
+
+        mockMvc.perform(post("/api/v1/auth/refresh"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("newAccessToken"));
+    }
+
+    @Test
+    void refresh_returns401WhenTokenExpired() throws Exception {
+        when(authService.refresh(any(), any()))
+                .thenThrow(new TokenExpiredException("Refresh token has expired"));
+
+        mockMvc.perform(post("/api/v1/auth/refresh"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refresh_returns404WhenTokenNotFound() throws Exception {
+        when(authService.refresh(any(), any()))
+                .thenThrow(new ResourceNotFoundException("Token not found"));
+
+        mockMvc.perform(post("/api/v1/auth/refresh"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void logout_returns200() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("validRefreshToken")
-                .build();
+        doNothing().when(authService).logout(any(), any());
 
-        doNothing().when(authService).logout(any());
-
-        mockMvc.perform(post("/api/v1/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(post("/api/v1/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Logged out successfully"));
     }
 
     @Test
     void logout_returns200EvenForUnknownToken() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("unknownOrExpiredToken")
-                .build();
+        doNothing().when(authService).logout(any(), any());
 
-        doNothing().when(authService).logout(any());
-
-        mockMvc.perform(post("/api/v1/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(post("/api/v1/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Logged out successfully"));
-    }
-
-    @Test
-    void logout_returns400WhenRefreshTokenIsBlank() throws Exception {
-        RefreshTokenRequest request = RefreshTokenRequest.builder()
-                .refreshToken("")
-                .build();
-
-        mockMvc.perform(post("/api/v1/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

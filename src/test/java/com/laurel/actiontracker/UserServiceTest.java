@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -27,6 +28,58 @@ public class UserServiceTest {
 
     @InjectMocks
     UserServiceImpl userService;
+
+    @Test
+    void getAllUsers_returnsListOfUsers() {
+        User user1 = new User();
+        user1.setId(1L);
+        user1.setEmail("user1@mail.com");
+        user1.setFullName("User One");
+        user1.setRole(User.Role.MEMBER);
+
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setEmail("user2@mail.com");
+        user2.setFullName("User Two");
+        user2.setRole(User.Role.ADMIN);
+
+        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+
+        List<UserResponse> result = userService.getAllUsers();
+
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get(0).getEmail()).isEqualTo("user1@mail.com");
+        assertThat(result.get(1).getEmail()).isEqualTo("user2@mail.com");
+
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getUserById_returnsUser() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("testuser@mail.com");
+        user.setFullName("User Name");
+        user.setRole(User.Role.MEMBER);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserResponse response = userService.getUserById(1L);
+
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getEmail()).isEqualTo("testuser@mail.com");
+
+        verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getUserById_throwsWhenNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getUserById(1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("1");
+    }
 
     @Test
     void updateUserRole_updatesAndReturnsUser() {

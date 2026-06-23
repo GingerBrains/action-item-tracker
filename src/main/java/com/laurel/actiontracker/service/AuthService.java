@@ -4,10 +4,12 @@ import com.laurel.actiontracker.dto.request.LoginRequest;
 import com.laurel.actiontracker.dto.request.RefreshTokenRequest;
 import com.laurel.actiontracker.dto.request.RegisterRequest;
 import com.laurel.actiontracker.dto.response.AuthResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
-    AuthResponse login(LoginRequest request);
-    AuthResponse refresh(RefreshTokenRequest request);
-    void logout(RefreshTokenRequest request);
+    AuthResponse login(LoginRequest request, HttpServletResponse response);
+    AuthResponse refresh(HttpServletRequest request, HttpServletResponse response);
+    void logout(HttpServletRequest request, HttpServletResponse response);
     void register(RegisterRequest request);
 }
