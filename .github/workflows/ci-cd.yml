@@ -68,6 +68,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Get GitHub Actions runner IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Add runner IP to EC2 security group
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ vars.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -116,3 +134,12 @@ jobs:
               -e ALLOWED_ORIGINS=http://${{ vars.EC2_HOST }} \
               ${{ vars.ECR_REPOSITORY }}:latest
             sudo systemctl reload nginx
+
+      - name: Remove runner IP from EC2 security group
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ vars.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32 || true
