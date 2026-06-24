@@ -39,13 +39,16 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final long refreshExpirationMs;
+    private final boolean cookieSecure;
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserDetailsService userDetailsService,
                            JwtUtil jwtUtil,
                            UserRepository userRepository,
                            RefreshTokenService refreshTokenService,
-                           PasswordEncoder passwordEncoder, @Value("${app.jwt.refresh-expiration-ms}") long refreshExpirationMs) {
+                           PasswordEncoder passwordEncoder,
+                           @Value("${app.jwt.refresh-expiration-ms}") long refreshExpirationMs,
+                           @Value("${app.cookie.secure:false}") boolean cookieSecure) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
@@ -53,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
         this.refreshExpirationMs = refreshExpirationMs;
+        this.cookieSecure = cookieSecure;
     }
 
     @Override
@@ -122,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
     private void addRefreshTokenCookie(HttpServletResponse response, String rawToken) {
         Cookie cookie = new Cookie("refreshToken", rawToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);        // HTTPS only in production
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/api/v1/auth"); // only sent to auth endpoints
         cookie.setMaxAge((int)(refreshExpirationMs / 1000)); // seconds, not ms
         cookie.setAttribute("SameSite", "Strict");
@@ -132,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/api/v1/auth");
         cookie.setMaxAge(0); // immediately expire
         response.addCookie(cookie);

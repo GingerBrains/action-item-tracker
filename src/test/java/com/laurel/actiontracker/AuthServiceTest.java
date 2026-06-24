@@ -63,7 +63,8 @@ public class AuthServiceTest {
                 userRepository,
                 refreshTokenService,
                 passwordEncoder,
-                604800000L
+                604800000L,
+                false
         );
     }
 

@@ -24,6 +24,11 @@ app:
     cors:
         allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
 
+    cookie:
+        # Set APP_COOKIE_SECURE=true once the app is served over HTTPS.
+        # Browsers drop Secure cookies on plain HTTP, breaking refresh/logout.
+        secure: ${APP_COOKIE_SECURE:false}
+
 logging:
     level:
         org.springframework.security: DEBUG
