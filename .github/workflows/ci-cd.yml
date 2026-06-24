@@ -95,6 +95,9 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
+        env:
+          VITE_API_BASE_URL: /api/v1
+          VITE_BACKEND_URL: http://${{ vars.EC2_HOST }}
         run: |
           npm ci
           npm run build
