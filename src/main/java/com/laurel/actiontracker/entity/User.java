@@ -31,6 +31,11 @@ public class User {
 
     private Instant createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
     public enum Role {
         ADMIN, MEMBER
     }

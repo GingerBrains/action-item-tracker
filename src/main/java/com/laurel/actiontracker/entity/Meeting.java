@@ -37,6 +37,11 @@ public class Meeting {
 
     private Instant createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
     public enum Status {
         SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
     }

@@ -45,6 +45,11 @@ public class ActionItem {
 
     private Instant createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
     public enum Status {
         OPEN, IN_PROGRESS, COMPLETED, CANCELLED
     }
