@@ -66,6 +66,7 @@ public class ActionItemServiceImpl implements ActionItemService {
         existing.setTitle(updated.getTitle());
         existing.setDescription(updated.getDescription());
         existing.setStatus(updated.getStatus());
+        existing.setPriority(updated.getPriority());
         existing.setDueDate(updated.getDueDate());
 
         Meeting meeting = meetingRepository.findById(request.getMeetingId())
