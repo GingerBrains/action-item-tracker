@@ -17,6 +17,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import static com.laurel.actiontracker.entity.User.Role.ADMIN;
 import java.util.List;
 
@@ -54,12 +57,12 @@ public class UserControllerTest extends BaseControllerTest {
         user.setEmail("testuser@mail.com");
         user.setRole(ADMIN);
 
-        when(userService.getAllUsers()).thenReturn(List.of(UserResponse.from(user)));
+        when(userService.getAllUsers(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(UserResponse.from(user))));
 
         mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].email").value("testuser@mail.com"));
+                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].email").value("testuser@mail.com"));
     }
 
     @Test

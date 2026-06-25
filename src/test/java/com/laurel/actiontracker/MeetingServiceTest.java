@@ -12,6 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mock;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -38,12 +43,12 @@ public class MeetingServiceTest {
         meeting.setMeetingDate(LocalDate.of(2026, 4, 1));
         meeting.setStatus(Meeting.Status.SCHEDULED);
 
-        when(meetingRepository.findAll()).thenReturn(List.of(meeting));
+        when(meetingRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(meeting)));
 
-        List<MeetingResponse> result = meetingService.getAllMeetings();
+        Page<MeetingResponse> result = meetingService.getAllMeetings(PageRequest.of(0, 20));
 
-        assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getTitle()).isEqualTo("Q1 2026 Board Meeting");
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getTitle()).isEqualTo("Q1 2026 Board Meeting");
     }
 
     @Test

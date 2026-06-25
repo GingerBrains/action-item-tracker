@@ -15,6 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -50,14 +55,14 @@ public class ActionItemServiceTest {
         meeting.setStatus(Meeting.Status.SCHEDULED);
         actionItem.setMeeting(meeting);
 
-        when(actionItemRepository.findAll()).thenReturn(List.of(actionItem));
+        when(actionItemRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(actionItem)));
 
-        List<ActionItemResponse> result = actionItemService.getAllActionItems();
+        Page<ActionItemResponse> result = actionItemService.getAllActionItems(PageRequest.of(0, 20));
 
-        assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getTitle()).isEqualTo("Review Q3 financials");
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getTitle()).isEqualTo("Review Q3 financials");
 
-        verify(actionItemRepository, times(1)).findAll();
+        verify(actionItemRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

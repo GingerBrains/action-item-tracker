@@ -2,11 +2,11 @@ package com.laurel.actiontracker.service;
 
 import com.laurel.actiontracker.dto.request.UpdateUserRoleRequest;
 import com.laurel.actiontracker.dto.response.UserResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(Pageable pageable);
     UserResponse getUserById(Long id);
     UserResponse updateUserRole(Long userId, UpdateUserRoleRequest request);
     UserResponse getUserByEmail(String email);

@@ -12,6 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -43,15 +48,15 @@ public class UserServiceTest {
         user2.setFullName("User Two");
         user2.setRole(User.Role.ADMIN);
 
-        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(user1, user2)));
 
-        List<UserResponse> result = userService.getAllUsers();
+        Page<UserResponse> result = userService.getAllUsers(PageRequest.of(0, 20));
 
-        assertThat(result.size()).isEqualTo(2);
-        assertThat(result.get(0).getEmail()).isEqualTo("user1@mail.com");
-        assertThat(result.get(1).getEmail()).isEqualTo("user2@mail.com");
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().get(0).getEmail()).isEqualTo("user1@mail.com");
+        assertThat(result.getContent().get(1).getEmail()).isEqualTo("user2@mail.com");
 
-        verify(userRepository, times(1)).findAll();
+        verify(userRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

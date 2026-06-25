@@ -6,10 +6,10 @@ import com.laurel.actiontracker.entity.Meeting;
 import com.laurel.actiontracker.exception.ResourceNotFoundException;
 import com.laurel.actiontracker.repository.MeetingRepository;
 import com.laurel.actiontracker.service.MeetingService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -22,10 +22,8 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MeetingResponse> getAllMeetings() {
-        return meetingRepository.findAll().stream()
-                .map(MeetingResponse::from)
-                .toList();
+    public Page<MeetingResponse> getAllMeetings(Pageable pageable) {
+        return meetingRepository.findAll(pageable).map(MeetingResponse::from);
     }
 
     @Override

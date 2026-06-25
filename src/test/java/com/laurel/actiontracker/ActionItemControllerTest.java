@@ -18,8 +18,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,7 +49,7 @@ public class ActionItemControllerTest extends BaseControllerTest {
     @Test
     @WithMockUser(roles = "MEMBER")
     void getAllActionItems_returns200() throws Exception {
-        when(actionItemService.getAllActionItems()).thenReturn(List.of());
+        when(actionItemService.getAllActionItems(any(Pageable.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/action-items"))
                 .andExpect(status().isOk());
