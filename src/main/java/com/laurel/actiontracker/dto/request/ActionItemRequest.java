@@ -26,6 +26,7 @@ public class ActionItemRequest {
     @NotNull(message = "Status is required")
     private ActionItem.Status status;
 
+    @NotNull(message = "Priority is required")
     private ActionItem.Priority priority;
 
     @NotNull(message = "Meeting ID is required")
