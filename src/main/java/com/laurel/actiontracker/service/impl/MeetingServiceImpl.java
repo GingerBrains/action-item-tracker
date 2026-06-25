@@ -21,6 +21,7 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MeetingResponse> getAllMeetings() {
         return meetingRepository.findAll().stream()
                 .map(MeetingResponse::from)
@@ -28,6 +29,7 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MeetingResponse getMeetingById(Long id) {
         Meeting meeting = findMeetingOrThrow(id);
         return MeetingResponse.from(meeting);

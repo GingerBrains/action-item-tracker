@@ -31,11 +31,13 @@ public class ActionItemServiceImpl implements ActionItemService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<ActionItemResponse> getAllActionItems() {
         return actionItemRepository.findAll().stream().map(ActionItemResponse::from).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ActionItemResponse getActionItemById(Long id) {
         ActionItem actionItem = findActionItemOrThrow(id);
         return ActionItemResponse.from(actionItem);
