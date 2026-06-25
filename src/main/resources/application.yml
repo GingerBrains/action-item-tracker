@@ -29,6 +29,15 @@ app:
         # Browsers drop Secure cookies on plain HTTP, breaking refresh/logout.
         secure: ${APP_COOKIE_SECURE:false}
 
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health
+    endpoint:
+        health:
+            show-details: never
+
 logging:
     level:
         org.springframework.security: DEBUG
