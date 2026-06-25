@@ -36,10 +36,17 @@ public class Meeting {
     private List<ActionItem> actionItems = new ArrayList<>();
 
     private Instant createdAt;
+    private Instant updatedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
+        updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
     }
 
     public enum Status {
