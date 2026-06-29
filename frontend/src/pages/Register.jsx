@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import PasswordInput from '../components/PasswordInput'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -86,12 +87,11 @@ export default function Register() {
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               required
-              className={`form-input${errors.password ? ' input-error' : ''}`}
+              className={errors.password ? 'input-error' : ''}
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import PasswordInput from '../components/PasswordInput'
 
 export default function Login() {
   const { login } = useAuth()
@@ -61,12 +62,11 @@ export default function Login() {
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               required
-              className={`form-input${fieldErrors.password ? ' input-error' : ''}`}
+              className={fieldErrors.password ? 'input-error' : ''}
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"

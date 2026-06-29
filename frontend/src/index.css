@@ -485,6 +485,39 @@ textarea.form-input { resize: vertical; }
 
 .required { color: var(--danger); }
 
+.password-input {
+  position: relative;
+}
+
+.password-input-field {
+  padding-right: 36px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-sec);
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color 0.12s;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
