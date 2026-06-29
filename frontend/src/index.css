@@ -518,6 +518,24 @@ textarea.form-input { resize: vertical; }
   outline-offset: 1px;
 }
 
+.status-cycle-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.status-cycle-btn:hover .badge {
+  opacity: 0.85;
+}
+
+.status-cycle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

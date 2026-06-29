@@ -6,6 +6,13 @@ import { StatusBadge, PriorityBadge } from '../components/Badge'
 
 const STATUSES = ['', 'OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
 const PRIORITIES = ['', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+const STATUS_CYCLE = ['OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+
+function nextStatus(current) {
+  const idx = STATUS_CYCLE.indexOf(current)
+  if (idx === -1) return STATUS_CYCLE[0]
+  return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length]
+}
 
 function isOverdue(item) {
   if (!item.dueDate) return false
@@ -35,6 +42,25 @@ export default function ActionItemsList() {
     try {
       await api.del(`/action-items/${id}`)
       setItems((prev) => prev.filter((i) => i.id !== id))
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  async function handleStatusCycle(item) {
+    const newStatus = nextStatus(item.status)
+    const payload = {
+      title: item.title,
+      description: item.description ?? '',
+      dueDate: item.dueDate,
+      status: newStatus,
+      priority: item.priority,
+      meetingId: item.meetingId,
+    }
+    if (item.assigneeId) payload.assigneeId = item.assigneeId
+    try {
+      const updated = await api.put(`/action-items/${item.id}`, payload)
+      setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)))
     } catch (err) {
       alert(err.message)
     }
@@ -123,7 +149,21 @@ export default function ActionItemsList() {
                   </td>
                   <td>{item.assigneeName || <span className="text-muted">Unassigned</span>}</td>
                   <td><PriorityBadge value={item.priority} /></td>
-                  <td><StatusBadge value={item.status} /></td>
+                  <td>
+                    {isAdmin ? (
+                      <button
+                        type="button"
+                        className="status-cycle-btn"
+                        onClick={() => handleStatusCycle(item)}
+                        aria-label={`Status: ${item.status.replace('_', ' ')}. Click to cycle.`}
+                        title="Click to cycle status"
+                      >
+                        <StatusBadge value={item.status} />
+                      </button>
+                    ) : (
+                      <StatusBadge value={item.status} />
+                    )}
+                  </td>
                   <td className={isOverdue(item) ? 'text-overdue' : ''}>{item.dueDate || '—'}</td>
                   {isAdmin && (
                     <td>
