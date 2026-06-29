@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderPage } from '../test/render'
 import { server, http, HttpResponse, BASE } from '../test/server'
@@ -51,6 +51,56 @@ describe('ActionItemsList — status cycle', () => {
       status: 'IN_PROGRESS',
     })
     expect(putBody.assigneeId).toBeUndefined()
+  })
+
+  it('delete requires confirmation and surfaces a success toast', async () => {
+    let deleteCalled = false
+    server.use(
+      http.get(`${BASE}/action-items`, () => HttpResponse.json([baseItem])),
+      http.delete(`${BASE}/action-items/1`, () => {
+        deleteCalled = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderPage(<ActionItemsList />, { route: '/action-items', path: '/action-items' })
+
+    await screen.findByText('Wire the thing')
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('Delete this action item?')).toBeInTheDocument()
+    expect(deleteCalled).toBe(false)
+
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
+
+    await screen.findByText('Action item deleted')
+    expect(deleteCalled).toBe(true)
+    expect(screen.queryByText('Wire the thing')).not.toBeInTheDocument()
+  })
+
+  it('delete can be cancelled and does not call the API', async () => {
+    let deleteCalled = false
+    server.use(
+      http.get(`${BASE}/action-items`, () => HttpResponse.json([baseItem])),
+      http.delete(`${BASE}/action-items/1`, () => {
+        deleteCalled = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderPage(<ActionItemsList />, { route: '/action-items', path: '/action-items' })
+
+    await screen.findByText('Wire the thing')
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+
+    expect(deleteCalled).toBe(false)
+    expect(screen.getByText('Wire the thing')).toBeInTheDocument()
   })
 
   it('cycle wraps CANCELLED → OPEN', async () => {

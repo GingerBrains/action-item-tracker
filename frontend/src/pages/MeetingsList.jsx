@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApi } from '../api/useApi'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
+import { useConfirm } from '../components/ConfirmDialog'
 import { StatusBadge } from '../components/Badge'
 
 export default function MeetingsList() {
   const api = useApi()
   const { isAdmin } = useAuth()
+  const toast = useToast()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const [meetings, setMeetings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,12 +24,19 @@ export default function MeetingsList() {
   }, [])
 
   async function handleDelete(id) {
-    if (!window.confirm('Delete this meeting? This cannot be undone.')) return
+    const ok = await confirm({
+      title: 'Delete this meeting?',
+      message: 'This cannot be undone.',
+      confirmText: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await api.del(`/meetings/${id}`)
       setMeetings((prev) => prev.filter((m) => m.id !== id))
+      toast.success('Meeting deleted')
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     }
   }
 

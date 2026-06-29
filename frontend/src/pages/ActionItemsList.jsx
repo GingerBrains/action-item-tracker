@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useApi } from '../api/useApi'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
+import { useConfirm } from '../components/ConfirmDialog'
 import { StatusBadge, PriorityBadge } from '../components/Badge'
 
 const STATUSES = ['', 'OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
@@ -23,6 +25,8 @@ function isOverdue(item) {
 export default function ActionItemsList() {
   const api = useApi()
   const { isAdmin } = useAuth()
+  const toast = useToast()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,12 +42,18 @@ export default function ActionItemsList() {
   }, [])
 
   async function handleDelete(id) {
-    if (!window.confirm('Delete this action item?')) return
+    const ok = await confirm({
+      title: 'Delete this action item?',
+      confirmText: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await api.del(`/action-items/${id}`)
       setItems((prev) => prev.filter((i) => i.id !== id))
+      toast.success('Action item deleted')
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     }
   }
 
@@ -62,7 +72,7 @@ export default function ActionItemsList() {
       const updated = await api.put(`/action-items/${item.id}`, payload)
       setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)))
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     }
   }
 

@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useApi } from '../api/useApi'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
+import { useConfirm } from '../components/ConfirmDialog'
 import { StatusBadge, PriorityBadge } from '../components/Badge'
 
 export default function MeetingDetail() {
   const { id } = useParams()
   const api = useApi()
   const { isAdmin } = useAuth()
+  const toast = useToast()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const [meeting, setMeeting] = useState(null)
   const [actionItems, setActionItems] = useState([])
@@ -25,22 +29,35 @@ export default function MeetingDetail() {
   }, [id])
 
   async function handleDeleteMeeting() {
-    if (!window.confirm('Delete this meeting and all its action items? This cannot be undone.')) return
+    const ok = await confirm({
+      title: 'Delete this meeting?',
+      message: 'All action items linked to this meeting will also be deleted. This cannot be undone.',
+      confirmText: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await api.del(`/meetings/${id}`)
+      toast.success('Meeting deleted')
       navigate('/meetings')
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     }
   }
 
   async function handleDeleteItem(itemId) {
-    if (!window.confirm('Delete this action item?')) return
+    const ok = await confirm({
+      title: 'Delete this action item?',
+      confirmText: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await api.del(`/action-items/${itemId}`)
       setActionItems((prev) => prev.filter((i) => i.id !== itemId))
+      toast.success('Action item deleted')
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     }
   }
 
