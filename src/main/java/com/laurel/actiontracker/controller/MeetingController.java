@@ -4,12 +4,14 @@ import com.laurel.actiontracker.dto.request.MeetingRequest;
 import com.laurel.actiontracker.dto.response.MeetingResponse;
 import com.laurel.actiontracker.service.MeetingService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/meetings")
@@ -22,8 +24,9 @@ public class MeetingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MeetingResponse>> getAllMeetings() {
-        return ResponseEntity.ok(meetingService.getAllMeetings());
+    public ResponseEntity<Page<MeetingResponse>> getAllMeetings(
+            @PageableDefault(size = 20, sort = "meetingDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(meetingService.getAllMeetings(pageable));
     }
 
     @GetMapping("/{id}")

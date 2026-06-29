@@ -10,10 +10,10 @@ import com.laurel.actiontracker.repository.ActionItemRepository;
 import com.laurel.actiontracker.repository.MeetingRepository;
 import com.laurel.actiontracker.repository.UserRepository;
 import com.laurel.actiontracker.service.ActionItemService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -31,11 +31,13 @@ public class ActionItemServiceImpl implements ActionItemService {
 
 
     @Override
-    public List<ActionItemResponse> getAllActionItems() {
-        return actionItemRepository.findAll().stream().map(ActionItemResponse::from).toList();
+    @Transactional(readOnly = true)
+    public Page<ActionItemResponse> getAllActionItems(Pageable pageable) {
+        return actionItemRepository.findAll(pageable).map(ActionItemResponse::from);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ActionItemResponse getActionItemById(Long id) {
         ActionItem actionItem = findActionItemOrThrow(id);
         return ActionItemResponse.from(actionItem);

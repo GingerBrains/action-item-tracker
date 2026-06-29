@@ -14,6 +14,7 @@ public class MeetingResponse {
     private LocalDate meetingDate;
     private Meeting.Status status;
     private Instant createdAt;
+    private Instant updatedAt;
 
     public static MeetingResponse from(Meeting meeting){
         MeetingResponse dto = new MeetingResponse();
@@ -23,6 +24,7 @@ public class MeetingResponse {
         dto.meetingDate = meeting.getMeetingDate();
         dto.status = meeting.getStatus();
         dto.createdAt = meeting.getCreatedAt();
+        dto.updatedAt = meeting.getUpdatedAt();
         return dto;
     }
 }

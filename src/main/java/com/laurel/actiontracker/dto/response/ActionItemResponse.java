@@ -18,6 +18,7 @@ public class ActionItemResponse {
     private Long assigneeId;
     private String assigneeName;
     private Instant createdAt;
+    private Instant updatedAt;
 
     public static ActionItemResponse from(ActionItem actionItem) {
         ActionItemResponse dto = new ActionItemResponse();
@@ -33,6 +34,7 @@ public class ActionItemResponse {
             dto.assigneeName = actionItem.getAssignee().getFullName();
         }
         dto.createdAt = actionItem.getCreatedAt();
+        dto.updatedAt = actionItem.getUpdatedAt();
         return dto;
 
     }

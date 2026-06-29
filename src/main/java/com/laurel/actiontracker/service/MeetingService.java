@@ -2,12 +2,12 @@ package com.laurel.actiontracker.service;
 
 import com.laurel.actiontracker.dto.request.MeetingRequest;
 import com.laurel.actiontracker.dto.response.MeetingResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface MeetingService {
 
-    List<MeetingResponse> getAllMeetings();
+    Page<MeetingResponse> getAllMeetings(Pageable pageable);
     MeetingResponse getMeetingById(Long id);
     MeetingResponse createMeeting(MeetingRequest request);
     MeetingResponse updateMeeting(Long id, MeetingRequest request);

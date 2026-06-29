@@ -8,7 +8,7 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
-        show-sql: true
+        show-sql: false
         open-in-view: false
 
 app:
@@ -28,6 +28,15 @@ app:
         # Set APP_COOKIE_SECURE=true once the app is served over HTTPS.
         # Browsers drop Secure cookies on plain HTTP, breaking refresh/logout.
         secure: ${APP_COOKIE_SECURE:false}
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health
+    endpoint:
+        health:
+            show-details: never
 
 logging:
     level:
