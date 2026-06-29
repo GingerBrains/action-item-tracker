@@ -33,6 +33,10 @@ jobs:
               - '!**/*.md'
               - '!.github/**'
               - '!src/test/**'
+              - '!frontend/**/*.test.js'
+              - '!frontend/**/*.test.jsx'
+              - '!frontend/src/test-setup.js'
+              - '!frontend/vitest.config.js'
 
   test:
     name: Run Tests
